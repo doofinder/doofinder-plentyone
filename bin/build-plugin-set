@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+. ./.env
+
+BASE_URL="https://p${PLENTYONE_SYSTEM_ID}.my.plentysystems.com"
+BUILD_URL="${BASE_URL}/rest/plugin_sets/${PLENTYONE_PLUGIN_SET_ID}/dev_mode/build"
+
+ACCESS_TOKEN=$(
+  jq -n --arg u "$PLENTYONE_USERNAME" --arg p "$PLENTYONE_PASSWORD" '{username: $u, password: $p}' |
+    curl -s -H "Content-Type: application/json" -d @- "${BASE_URL}/rest/login" |
+    jq -er '.access_token'
+) || { echo "Login failed. Check the values in .env."; exit 1; }
+
+AUTHORIZATION="Authorization: Bearer ${ACCESS_TOKEN}"
+
+curl -sS --fail-with-body -X POST -H "$AUTHORIZATION" "$BUILD_URL"
+echo "Building plugin set ${PLENTYONE_PLUGIN_SET_ID}..."
+
+FAILED='any(.stepsStatus[]?; . == "failed")'
+FINISHED="$FAILED or ((.stepsStatus | length) > 0 and all(.stepsStatus[]; . == \"finished\"))"
+
+for _ in $(seq 30); do
+  STATUS=$(curl -sS --fail-with-body -H "$AUTHORIZATION" "$BUILD_URL")
+  echo "$STATUS" | jq -e "$FINISHED" > /dev/null && break
+  sleep 2
+done
+
+echo "$STATUS" | jq -e "$FINISHED" > /dev/null || { echo "Timed out waiting for the build."; exit 1; }
+
+echo "$STATUS" | jq -e "$FAILED" > /dev/null && { echo "$STATUS" | jq .buildErrors; exit 1; }
+
+echo "Build finished without errors."
