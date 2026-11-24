@@ -54,7 +54,7 @@ The plugin has no page. It generates a token and records its feed URL in its own
 
 * The feed URL and the token are the fields of `config.json`. When the token is empty, the service provider fills both (`ConfigurationGenerator`).
 * `TokenGuard` checks the token of every request. A missing token in the configuration is never accepted.
-* In Doofinder, the shop is added with the store wizard (PlentyONE flow of doomanager); `dooplugins` validates the token and installs the store.
+* In Doofinder, the shop is added with the PlentyONE option of the store wizard, which checks the token and installs the store.
 
 ### Your own PlentyONE system
 
