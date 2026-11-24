@@ -1,0 +1,12 @@
+{
+    "name": "Doofinder",
+    "namespace": "Doofinder",
+    "type": "general",
+    "version": "0.0.1",
+    "pluginIcon": "icon_plugin_xs.png",
+    "description": "AI-powered search and discovery for PlentyONE shops",
+    "license": "MIT",
+    "author": "Doofinder",
+    "authorIcon": "icon_author_xs.png",
+    "serviceProvider": "Doofinder\\Providers\\DoofinderServiceProvider"
+}
